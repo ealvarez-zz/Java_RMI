@@ -30,11 +30,29 @@ public class PaintClient extends UnicastRemoteObject implements PaintClientInter
         }
     }
 
+    public void sleep() throws RemoteException {
+        if(clientDraw != null) {
+            clientDraw.disableDraw();
+        }
+    }
+
     public void wakeUp() throws RemoteException {
         if (clientDraw != null) {
             clientDraw.enableDraw();
             repaintFrame();
         }
+    }
+
+    public void setServer(PaintServerInterface server) throws RemoteException{
+         clientDraw.setServer(server);
+    }
+
+    public void serverIsMigrating() throws RemoteException{
+        sleep();
+    }
+
+    public void serverIsDoneMigrating() throws RemoteException {
+        wakeUp();
     }
 
     public void askReset() throws RemoteException {

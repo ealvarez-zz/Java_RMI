@@ -193,6 +193,10 @@ public class Frame extends JFrame {
         enabled = false;
     }
 
+    public void setServer(PaintServerInterface server) throws RemoteException {
+        this.server = server;
+    }
+
     class MouseController extends MouseAdapter {
 
         public void mousePressed(MouseEvent event) {
