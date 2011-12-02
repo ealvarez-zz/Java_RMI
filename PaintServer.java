@@ -117,6 +117,10 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
         serversList = newServersList;
     }
 
+    public ArrayList<PaintServerInterface> getServerList() throws RemoteException {
+        return serversList;
+    }
+
     public void setClients(ArrayList<PaintClientInterface> newClientsList) throws RemoteException {
         clients = newClientsList;
     }
@@ -157,6 +161,12 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
         return newServer;
     }
 
+    public void updateClientsServer(PaintServerInterface server) {
+        for (int i = 0; i < clients.size(); i++) {
+//            clients.get(i).setServer(server);
+        }
+    }
+
     public void initMigration() throws RemoteException {
 
         System.out.println("Iniciando Migracion...");
@@ -170,20 +180,28 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
             return;
         }
 
+        // Notify clients 
+        for (int i = 0; i < clients.size(); i++) {
+//            clients.get(i).serverIsMigrating());
+        }
+
         // Copy data to new server
 
         newServer.setClients(clients);
         newServer.setDraw(draw);
 
         // Change server in clients
-
+        updateClientsServer(newServer);
 
         // Activate new Server
         newServer.setRunningState(true);
 
+        // Notify clients
+        for (int i = 0; i < clients.size(); i++) {
+//            clients.get(i).serverIsDoneMigrating());
+        }
 
         // deactivate and reset server
-
         setRunningState(false);
         resetServer();
 
@@ -194,16 +212,16 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
     public static void main(String[] args) {
 
         String serverIP = null;
-        PaintServerInterface activeServer = null;
+        PaintServerInterface serverParam = null;
 
         if (args != null && args.length > 0 && Integer.parseInt(args[0]) > 0) {
             setNumberOfClients(Integer.parseInt(args[0]));
             if (args.length > 1) {
                 try {
                     serverIP = args[1];
-                    activeServer = (PaintServerInterface) Naming.lookup("rmi://" + args[1] + "/paint");
+                    serverParam = (PaintServerInterface) Naming.lookup("rmi://" + args[1] + "/paint");
                 } catch (Exception e) {
-                    activeServer = null;
+                    serverParam = null;
                 }
             }
         }
@@ -214,6 +232,16 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
             Naming.rebind("paint", server);
             Thread migrator = new MigrationHandler(server);
             migrator.start();
+
+            if (serverParam == null) {
+                // Es el primer servidor
+                server.setRunningState(true);
+            } else {
+                // No es el primer servidor, hay que recuperar la lista de servidores
+                server.setServerList(serverParam.getServerList());
+                server.addServer();
+                server.broadcastServersList();
+            }
         } catch (RemoteException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
