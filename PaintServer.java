@@ -2,11 +2,12 @@
 import java.awt.Point;
 import java.util.List;
 import java.util.ArrayList;
-
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
 
 public class PaintServer extends UnicastRemoteObject implements PaintServerInterface {
 
@@ -57,13 +58,13 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
 
     public synchronized void resetDraw() throws RemoteException {
 
-        
+
         askClientsForReset();
 
         if (RESET_DECISION) {
             setDraw(new ArrayList<List<Point>>());
         }
-        
+
         broadcast();
         RESET_DECISION = true;
         CLIENT_RESPONSES = 0;
@@ -97,6 +98,26 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
         if (args != null && args.length > 0 && Integer.parseInt(args[0]) > 0) {
             setNumberOfClients(Integer.parseInt(args[0]));
         }
+
+        Thread t1 = new Thread(new Runnable() {
+
+            public void run() {
+
+                try {
+                    while (true) {
+                        OperatingSystemMXBean myOsBean = ManagementFactory.getOperatingSystemMXBean();
+                        double load = myOsBean.getSystemLoadAverage();
+                        System.out.println("Current System load: " + load);
+                        Thread.sleep(1000);
+                    }
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        t1.start();
 
         try {
             PaintServerInterface server = new PaintServer();
