@@ -1,6 +1,6 @@
 import java.awt.Point;
 import java.util.List;
-
+import java.util.ArrayList;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
@@ -13,4 +13,7 @@ public interface PaintServerInterface extends Remote {
         public void resetDraw() throws RemoteException;
         public void clientAcceptResetDraw() throws RemoteException;
         public void clientDenyResetDraw() throws RemoteException;
+        public void setServerList(ArrayList<PaintServerInterface> newServersList) throws RemoteException;
+        public boolean isRunning() throws RemoteException;
+        public double getServerLoad() throws RemoteException;
 }

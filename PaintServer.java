@@ -20,6 +20,8 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
     private static int MAX_CLIENTS = 3;
     private int CLIENT_RESPONSES = 0;
     private boolean RESET_DECISION = true;
+    private ArrayList<PaintServerInterface> serversList = new ArrayList<PaintServerInterface>();
+    private boolean isRunning = false;
 
     protected PaintServer() throws RemoteException {
         super();
@@ -91,6 +93,50 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
 
     public static void setNumberOfClients(int numberOfClients) {
         MAX_CLIENTS = numberOfClients;
+    }
+
+    public void addServer() throws RemoteException {
+
+        serversList.add(this);
+
+        if (serversList.size() > 1) {
+            broadcastServersList();
+        }
+    }
+
+    public void broadcastServersList() throws RemoteException {
+
+
+        for (int i = 0; i < serversList.size(); i++) {
+            PaintServerInterface server = serversList.get(i);
+            server.setServerList(serversList);
+        }
+    }
+
+    public void setServerList(ArrayList<PaintServerInterface> newServersList) throws RemoteException {
+        serversList = newServersList;
+    }
+
+    public void setClients(ArrayList<PaintClientInterface> newClientsList) {
+        clients = newClientsList;
+    }
+
+    public void resetServer() throws RemoteException {
+        clients = new ArrayList<PaintClientInterface>();
+        resetDraw();
+    }
+
+    private void setRunningState(boolean status) {
+        isRunning = status;
+    }
+
+    public boolean isRunning() throws RemoteException{
+        return isRunning;
+    }
+
+    public double getServerLoad() throws RemoteException{
+        OperatingSystemMXBean myOsBean = ManagementFactory.getOperatingSystemMXBean();
+        return myOsBean.getSystemLoadAverage();
     }
 
     public static void main(String[] args) {
