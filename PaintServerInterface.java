@@ -16,4 +16,7 @@ public interface PaintServerInterface extends Remote {
         public void setServerList(ArrayList<PaintServerInterface> newServersList) throws RemoteException;
         public boolean isRunning() throws RemoteException;
         public double getServerLoad() throws RemoteException;
+        public void initMigration() throws RemoteException;
+        public void setClients(ArrayList<PaintClientInterface> newClientsList) throws RemoteException;
+        public void setRunningState(boolean status) throws RemoteException;
 }

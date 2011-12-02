@@ -117,7 +117,7 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
         serversList = newServersList;
     }
 
-    public void setClients(ArrayList<PaintClientInterface> newClientsList) {
+    public void setClients(ArrayList<PaintClientInterface> newClientsList) throws RemoteException {
         clients = newClientsList;
     }
 
@@ -126,48 +126,94 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
         resetDraw();
     }
 
-    private void setRunningState(boolean status) {
+    public void setRunningState(boolean status) throws RemoteException {
         isRunning = status;
     }
 
-    public boolean isRunning() throws RemoteException{
+    public boolean isRunning() throws RemoteException {
         return isRunning;
     }
 
-    public double getServerLoad() throws RemoteException{
+    public double getServerLoad() throws RemoteException {
         OperatingSystemMXBean myOsBean = ManagementFactory.getOperatingSystemMXBean();
         return myOsBean.getSystemLoadAverage();
     }
 
+    public PaintServerInterface getNewHostingServer() throws RemoteException {
+
+        double minLoad = getServerLoad();
+        PaintServerInterface serverCandidate = null;
+        PaintServerInterface newServer = serverCandidate;
+
+        for (int i = 0; i < serversList.size(); i++) {
+            serverCandidate = serversList.get(i);
+            double serverCandidateLoad = serverCandidate.getServerLoad();
+            if (!serverCandidate.isRunning() && serverCandidateLoad < minLoad) {
+                minLoad = serverCandidateLoad;
+                newServer = serverCandidate;
+            }
+        }
+
+        return newServer;
+    }
+
+    public void initMigration() throws RemoteException {
+
+        System.out.println("Iniciando Migracion...");
+
+
+        // Searching for a new server
+        PaintServerInterface newServer = getNewHostingServer();
+
+        if (newServer == null) {
+            System.out.println("No hay disponible otro servidor");
+            return;
+        }
+
+        // Copy data to new server
+
+        newServer.setClients(clients);
+        newServer.setDraw(draw);
+
+        // Change server in clients
+
+
+        // Activate new Server
+        newServer.setRunningState(true);
+
+
+        // deactivate and reset server
+
+        setRunningState(false);
+        resetServer();
+
+
+
+    }
+
     public static void main(String[] args) {
+
+        String serverIP = null;
+        PaintServerInterface activeServer = null;
 
         if (args != null && args.length > 0 && Integer.parseInt(args[0]) > 0) {
             setNumberOfClients(Integer.parseInt(args[0]));
-        }
-
-        Thread t1 = new Thread(new Runnable() {
-
-            public void run() {
-
+            if (args.length > 1) {
                 try {
-                    while (true) {
-                        OperatingSystemMXBean myOsBean = ManagementFactory.getOperatingSystemMXBean();
-                        double load = myOsBean.getSystemLoadAverage();
-                        System.out.println("Current System load: " + load);
-                        Thread.sleep(1000);
-                    }
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    serverIP = args[1];
+                    activeServer = (PaintServerInterface) Naming.lookup("rmi://" + args[1] + "/paint");
+                } catch (Exception e) {
+                    activeServer = null;
                 }
             }
-        });
+        }
 
-        t1.start();
 
         try {
             PaintServerInterface server = new PaintServer();
             Naming.rebind("paint", server);
+            Thread migrator = new MigrationHandler(server);
+            migrator.start();
         } catch (RemoteException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
