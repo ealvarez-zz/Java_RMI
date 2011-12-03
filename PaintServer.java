@@ -167,7 +167,7 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
 
     public void updateClientsServer(PaintServerInterface server) {
         for (int i = 0; i < clients.size(); i++) {
-//            clients.get(i).setServer(server);
+            clients.get(i).setServer(server);
         }
     }
 
