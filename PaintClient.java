@@ -63,7 +63,7 @@ public class PaintClient extends UnicastRemoteObject implements PaintClientInter
 
     protected PaintClient(PaintServerInterface server) throws RemoteException {
         super();
-        clientDraw = new Frame(server);
+        clientDraw = new Frame(this, server);
         server.register(this);
     }
 

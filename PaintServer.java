@@ -42,6 +42,10 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
         }
     }
 
+    public void removeClient(PaintClientInterface client) throws RemoteException {
+        clients.remove(client);
+    }
+
     public void wakeUpClients() throws RemoteException {
         for (int i = 0; i < clients.size(); i++) {
             clients.get(i).wakeUp();
@@ -165,7 +169,7 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
         return newServer;
     }
 
-    public void updateClientsServer(PaintServerInterface server) throws RemoteException{
+    public void updateClientsServer(PaintServerInterface server) throws RemoteException {
         for (int i = 0; i < clients.size(); i++) {
             clients.get(i).setServer(server);
         }

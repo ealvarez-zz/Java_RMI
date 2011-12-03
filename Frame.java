@@ -8,6 +8,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,10 +31,11 @@ public class Frame extends JFrame {
     private JPanel panelMain = new PanelMain();
     private JLabel labelInfo = new JLabel();
     private PaintServerInterface server;
+    private PaintClientInterface client;
     private boolean enabled = false;
     private boolean resetRequested = false;
 
-    public Frame(PaintServerInterface newServer) {
+    public Frame(PaintClientInterface clientInterface, PaintServerInterface newServer) {
         super(TITLE);
         this.setVisible(true);
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -55,19 +59,27 @@ public class Frame extends JFrame {
             }
         });
 
+
         this.add(panelMain, BorderLayout.CENTER);
         this.add(labelInfo, BorderLayout.NORTH);
         southLayout.add(deleteButton);
 
 
         MouseController mouseController = new MouseController();
+        WindowController windowController = new WindowController();
+
+
+        addWindowListener(windowController);
         panelMain.addMouseListener(mouseController);
         panelMain.addMouseMotionListener(mouseController);
+
+
         // this.buttonFinish.addActionListener(new FinishActionListener());
 
 
         this.add(southLayout, BorderLayout.SOUTH);
         this.server = newServer;
+        this.client = clientInterface;
         setLabel("Esperando usuarios");
 
     }
@@ -108,8 +120,8 @@ public class Frame extends JFrame {
 //        } else {
 //            enableDraw();
 //        }
- 
-        
+
+
     }
 
     public void acceptReset() throws RemoteException {
@@ -229,6 +241,19 @@ public class Frame extends JFrame {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    class WindowController extends WindowAdapter {
+
+        @Override
+        public void windowClosing(WindowEvent e) {
+            try {
+                server.removeClient(client);
+            } catch (RemoteException re) {
+                re.printStackTrace();
+            }
+
         }
     }
 }
