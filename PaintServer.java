@@ -103,10 +103,8 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
     public void addServer() throws RemoteException {
 
         serversList.add(this);
+        broadcastServersList();
 
-        if (serversList.size() > 1) {
-            broadcastServersList();
-        }
     }
 
     public void broadcastServersList() throws RemoteException {
@@ -149,6 +147,7 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
     }
 
     public PaintServerInterface getNewHostingServer() throws RemoteException {
+
 
         double minLoad = getServerLoad();
         PaintServerInterface serverCandidate = null;
@@ -229,6 +228,7 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
                     serverIP = args[1];
                     serverParam = (PaintServerInterface) Naming.lookup("rmi://" + args[1] + "/paint");
                 } catch (Exception e) {
+                    System.out.println("no encontre el server :S");
                     serverParam = null;
                 }
             }
@@ -243,12 +243,20 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
 
             if (serverParam == null) {
                 // Es el primer servidor
+                server.addServer();
                 server.setRunningState(true);
             } else {
                 // No es el primer servidor, hay que recuperar la lista de servidores
-                server.setServerList(serverParam.getServerList());
+
+                ArrayList<PaintServerInterface> aux = serverParam.getServerList();
+
+                System.out.println("tamaño del pool "+aux.size());
+
+                server.setServerList(aux);
                 server.addServer();
-                server.broadcastServersList();
+
+                System.out.println("tamaño de mi lista "+ server.getServerList());
+
             }
         } catch (RemoteException e) {
             // TODO Auto-generated catch block
