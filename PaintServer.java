@@ -165,7 +165,7 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
         return newServer;
     }
 
-    public void updateClientsServer(PaintServerInterface server) {
+    public void updateClientsServer(PaintServerInterface server) throws RemoteException{
         for (int i = 0; i < clients.size(); i++) {
             clients.get(i).setServer(server);
         }
