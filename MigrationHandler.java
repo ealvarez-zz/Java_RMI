@@ -15,12 +15,11 @@ public class MigrationHandler extends Thread {
         try {
             while (true) {
                 Thread.sleep(1000);
-                if (server.isRunning()) {
+                if (server.isRunning() && !server.isMigrating()) {
                     double load = server.getServerLoad();
                     System.out.println("Current System load: " + load);
                     if (load > 0.7) {
                         server.initMigration();
-                        break;
                     }
                 }
             }

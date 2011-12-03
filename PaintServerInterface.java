@@ -38,4 +38,6 @@ public interface PaintServerInterface extends Remote {
     public void addServer() throws RemoteException;
 
     public void broadcastServersList() throws RemoteException;
+    
+    public boolean isMigrating() throws RemoteException;
 }

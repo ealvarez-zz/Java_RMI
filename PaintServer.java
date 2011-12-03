@@ -22,6 +22,7 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
     private boolean RESET_DECISION = true;
     private ArrayList<PaintServerInterface> serversList = new ArrayList<PaintServerInterface>();
     private boolean isRunning = false;
+    private boolean isMigrating = false;
 
     protected PaintServer() throws RemoteException {
         super();
@@ -76,6 +77,10 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
         for (int i = 0; i < clients.size(); i++) {
             clients.get(i).askReset();
         }
+    }
+
+    public boolean isMigrating() throws RemoteException {
+        return isMigrating;
     }
 
     public void clientAcceptResetDraw() throws RemoteException {
@@ -170,6 +175,7 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
     public void initMigration() throws RemoteException {
 
         System.out.println("Iniciando Migracion...");
+        isMigrating = true;
 
 
         // Searching for a new server
@@ -177,12 +183,13 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
 
         if (newServer == null) {
             System.out.println("No hay disponible otro servidor");
+            isMigrating = false;
             return;
         }
 
         // Notify clients 
         for (int i = 0; i < clients.size(); i++) {
-//            clients.get(i).serverIsMigrating());
+            clients.get(i).serverIsMigrating();
         }
 
         // Copy data to new server
@@ -198,11 +205,12 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
 
         // Notify clients
         for (int i = 0; i < clients.size(); i++) {
-//            clients.get(i).serverIsDoneMigrating());
+            clients.get(i).serverIsDoneMigrating();
         }
 
         // deactivate and reset server
         setRunningState(false);
+        isMigrating = false;
         resetServer();
 
 

@@ -8,4 +8,6 @@ public interface PaintClientInterface extends Remote{
         public void wakeUp() throws RemoteException;
         public void askReset() throws RemoteException;
         public void setServer(PaintServerInterface server) throws RemoteException;
+        public void serverIsMigrating() throws RemoteException;
+        public void serverIsDoneMigrating() throws RemoteException;
 }
