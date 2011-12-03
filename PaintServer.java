@@ -194,7 +194,7 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
         // Copy data to new server
 
         newServer.setClients(clients);
-        newServer.setDraw(draw);
+        newServer.setDraw(getDraw());
 
         // Change server in clients
         updateClientsServer(newServer);
@@ -211,7 +211,7 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
         System.out.println("Termine la migración!");
         setRunningState(false);
         isMigrating = false;
-        resetServer();
+//        resetServer();
 
 
 
