@@ -27,7 +27,7 @@ public class Frame extends JFrame {
     private static final String TITLE = "CC5303 - Sistemas Distribuidos";
     private JPanel panelMain = new PanelMain();
     private JLabel labelInfo = new JLabel();
-    private static PaintServerInterface server;
+    private PaintServerInterface server;
     private boolean enabled = false;
     private boolean resetRequested = false;
 

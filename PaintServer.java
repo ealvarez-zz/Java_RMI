@@ -208,6 +208,7 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
         }
 
         // deactivate and reset server
+        System.out.println("Termine la migración!");
         setRunningState(false);
         isMigrating = false;
         resetServer();
@@ -249,13 +250,8 @@ public class PaintServer extends UnicastRemoteObject implements PaintServerInter
                 // No es el primer servidor, hay que recuperar la lista de servidores
 
                 ArrayList<PaintServerInterface> aux = serverParam.getServerList();
-
-                System.out.println("tamaño del pool "+aux.size());
-
                 server.setServerList(aux);
                 server.addServer();
-
-                System.out.println("tamaño de mi lista "+ server.getServerList());
 
             }
         } catch (RemoteException e) {
